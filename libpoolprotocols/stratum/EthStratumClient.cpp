@@ -9,6 +9,7 @@
 #include <wincrypt.h>
 #endif
 
+using namespace boost::placeholders;
 using boost::asio::ip::tcp;
 
 EthStratumClient::EthStratumClient(int worktimeout, int responsetimeout)
