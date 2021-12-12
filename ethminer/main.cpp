@@ -223,7 +223,7 @@ public:
         app.set_help_flag();
         app.add_flag("-h,--help", bhelp, "Show help");
 
-        app.add_set("-H,--help-ext", shelpExt,
+        app.add_option("-H,--help-ext", shelpExt, "")->check(CLI::IsMember(
             {
                 "con", "test",
 #if ETH_ETHASHCL
@@ -239,43 +239,43 @@ public:
                     "api",
 #endif
                     "misc", "env"
-            },
-            "", true);
+            })
+        )->capture_default_str();
 
         bool version = false;
 
-        app.add_option("--ergodicity", m_FarmSettings.ergodicity, "", true)->check(CLI::Range(0, 2));
+        app.add_option("--ergodicity", m_FarmSettings.ergodicity, "")->capture_default_str()->check(CLI::Range(0, 2));
 
         app.add_flag("-V,--version", version, "Show program version");
 
-        app.add_option("-v,--verbosity", g_logOptions, "", true)->check(CLI::Range(LOG_NEXT - 1));
+        app.add_option("-v,--verbosity", g_logOptions, "")->capture_default_str()->check(CLI::Range(LOG_NEXT - 1));
 
-        app.add_option("--farm-recheck", m_PoolSettings.getWorkPollInterval, "", true)->check(CLI::Range(1, 99999));
+        app.add_option("--farm-recheck", m_PoolSettings.getWorkPollInterval, "")->capture_default_str()->check(CLI::Range(1, 99999));
 
-        app.add_option("--farm-retries", m_PoolSettings.connectionMaxRetries, "", true)->check(CLI::Range(0, 99999));
+        app.add_option("--farm-retries", m_PoolSettings.connectionMaxRetries, "")->capture_default_str()->check(CLI::Range(0, 99999));
 
-        app.add_option("--retry-delay", m_PoolSettings.delayBeforeRetry, "", true)
+        app.add_option("--retry-delay", m_PoolSettings.delayBeforeRetry, "")->capture_default_str()
             ->check(CLI::Range(1, 999));
         
-        app.add_option("--work-timeout", m_PoolSettings.noWorkTimeout, "", true)
+        app.add_option("--work-timeout", m_PoolSettings.noWorkTimeout, "")->capture_default_str()
             ->check(CLI::Range(180, 99999));
 
-        app.add_option("--response-timeout", m_PoolSettings.noResponseTimeout, "", true)
+        app.add_option("--response-timeout", m_PoolSettings.noResponseTimeout, "")->capture_default_str()
             ->check(CLI::Range(2, 999));
 
         app.add_flag("-R,--report-hashrate,--report-hr", m_PoolSettings.reportHashrate, "");
 
-        app.add_option("--display-interval", m_cliDisplayInterval, "", true)
+        app.add_option("--display-interval", m_cliDisplayInterval, "")->capture_default_str()
             ->check(CLI::Range(1, 1800));
 
-        app.add_option("--HWMON", m_FarmSettings.hwMon, "", true)->check(CLI::Range(0, 2));
+        app.add_option("--HWMON", m_FarmSettings.hwMon, "")->capture_default_str()->check(CLI::Range(0, 2));
 
         app.add_flag("--exit", g_exitOnError, "");
 
         vector<string> pools;
         app.add_option("-P,--pool", pools, "");
 
-        app.add_option("--failover-timeout", m_PoolSettings.poolFailoverTimeout, "", true)
+        app.add_option("--failover-timeout", m_PoolSettings.poolFailoverTimeout, "")->capture_default_str()
             ->check(CLI::Range(0, 999));
 
         app.add_flag("--nocolor", g_logNoColor, "");
@@ -286,7 +286,7 @@ public:
 
 #if API_CORE
 
-        app.add_option("--api-bind", m_api_bind, "", true)
+        app.add_option("--api-bind", m_api_bind, "")->capture_default_str()
             ->check([this](const string& bind_arg) -> string {
                 try
                 {
@@ -301,7 +301,7 @@ public:
                 return string("");
             });
 
-        app.add_option("--api-port", m_api_port, "", true)->check(CLI::Range(-65535, 65535));
+        app.add_option("--api-port", m_api_port, "")->capture_default_str()->check(CLI::Range(-65535, 65535));
 
         app.add_option("--api-password", m_api_password, "");
 
@@ -317,9 +317,9 @@ public:
 
         app.add_option("--opencl-device,--opencl-devices,--cl-devices", m_CLSettings.devices, "");
 
-        app.add_option("--cl-global-work", m_CLSettings.globalWorkSize, "", true);
+        app.add_option("--cl-global-work", m_CLSettings.globalWorkSize, "")->capture_default_str();
 
-        app.add_set("--cl-local-work", m_CLSettings.localWorkSize, {64, 128, 256}, "", true);
+        app.add_option("--cl-local-work", m_CLSettings.localWorkSize, "")->check(CLI::IsMember({64, 128, 256}))->capture_default_str();
 
         app.add_flag("--cl-nobin", m_CLSettings.noBinary, "");
 
@@ -334,14 +334,14 @@ public:
         app.add_option("--cuda-grid-size,--cu-grid-size", m_CUSettings.gridSize, "", true)
             ->check(CLI::Range(1, 131072));
 
-        app.add_set(
-            "--cuda-block-size,--cu-block-size", m_CUSettings.blockSize, {32, 64, 128, 256}, "", true);
+        app.add_option(
+            "--cuda-block-size,--cu-block-size", m_CUSettings.blockSize, "")->check(CLI::IsMember({32, 64, 128, 256}))->capture_default_str();
 
         string sched = "sync";
-        app.add_set(
-            "--cuda-schedule,--cu-schedule", sched, {"auto", "spin", "yield", "sync"}, "", true);
+        app.add_option(
+            "--cuda-schedule,--cu-schedule", sched, "")->check(CLI::IsMember({"auto", "spin", "yield", "sync"}))->capture_default_str();
 
-        app.add_option("--cuda-streams,--cu-streams", m_CUSettings.streams, "", true)
+        app.add_option("--cuda-streams,--cu-streams", m_CUSettings.streams, "")->capture_default_str()
             ->check(CLI::Range(1, 99));
 
 #endif
@@ -354,7 +354,7 @@ public:
 
         app.add_flag("--noeval", m_FarmSettings.noEval, "");
 
-        app.add_option("-L,--dag-load-mode", m_FarmSettings.dagLoadMode, "", true)->check(CLI::Range(1));
+        app.add_option("-L,--dag-load-mode", m_FarmSettings.dagLoadMode, "")->capture_default_str()->check(CLI::Range(1));
 
         bool cl_miner = false;
         app.add_flag("-G,--opencl", cl_miner, "");
@@ -366,10 +366,10 @@ public:
 #if ETH_ETHASHCPU
         app.add_flag("--cpu", cpu_miner, "");
 #endif
-        auto sim_opt = app.add_option("-Z,--simulation,-M,--benchmark", m_PoolSettings.benchmarkBlock, "", true);
+        auto sim_opt = app.add_option("-Z,--simulation,-M,--benchmark", m_PoolSettings.benchmarkBlock, "")->capture_default_str();
 
-        app.add_option("--tstop", m_FarmSettings.tempStop, "", true)->check(CLI::Range(30, 100));
-        app.add_option("--tstart", m_FarmSettings.tempStart, "", true)->check(CLI::Range(30, 100));
+        app.add_option("--tstop", m_FarmSettings.tempStop, "")->capture_default_str()->check(CLI::Range(30, 100));
+        app.add_option("--tstart", m_FarmSettings.tempStart, "")->capture_default_str()->check(CLI::Range(30, 100));
 
 
         // Exception handling is held at higher level
